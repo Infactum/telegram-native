@@ -3,6 +3,11 @@ project(TELEGRAM_NATIVE)
 
 set(CMAKE_CXX_STANDARD 14)
 
+if (UNIX)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif ()
+
 find_package(Td 1.2.0 REQUIRED)
 find_package(ICU 59 REQUIRED COMPONENTS uc dt)
 find_package(OpenSSL REQUIRED)
@@ -19,11 +24,12 @@ add_library(telegram_native SHARED
 target_include_directories(telegram_native PRIVATE include)
 target_link_libraries(telegram_native PRIVATE
         Td::TdJsonStatic
-        ICU::uc ICU::dt
-        OpenSSL::SSL OpenSSL::Crypto
-        ZLIB::ZLIB)
+        ICU::uc ICU::dt)
 
 if (MSVC)
+    target_link_libraries(telegram_native PRIVATE
+            OpenSSL::SSL OpenSSL::Crypto
+            ZLIB::ZLIB)
     set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
     target_compile_definitions(telegram_native PRIVATE _WINDOWS)
 endif ()

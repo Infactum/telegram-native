@@ -19,7 +19,7 @@ jobs:
             cp telegram_native.so /src
             EOF
 
-      - run: "docker run --rm -v "$(pwd)":/src $DOCKER_IMAGE /bin/bash -c "$TASK""
+      - run: "docker run --rm -v $(pwd):/src $DOCKER_IMAGE /bin/bash -c $TASK"
 
       - run: "docker push $DOCKER_IMAGE"
       

@@ -1,0 +1,28 @@
+version: 2
+jobs: 
+  build: 
+    machine: true
+    steps: 
+      - checkout
+      - run: |
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+            docker pull $DOCKER_IMAGE
+
+      - run: "docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest"
+
+      - run: |
+            read -r -d '' TASK <<EOF
+            mkdir build && cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release /src;
+            cmake --build .
+            ldd telegram_native.so
+            cp telegram_native.so /src
+            EOF
+
+      - run: "docker run --rm -v "$(pwd)":/src $DOCKER_IMAGE /bin/bash -c "$TASK""
+
+      - run: "docker push $DOCKER_IMAGE"
+      
+      - store_artifacts:
+          path: telegram_native.so
+          destination: prefix

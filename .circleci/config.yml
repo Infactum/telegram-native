@@ -22,4 +22,4 @@ jobs:
       
       - store_artifacts:
           path: telegram_native.so
-          destination: prefix
+          destination: telegram_native.so

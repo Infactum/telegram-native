@@ -43,8 +43,7 @@ for:
       echo. >> "%VCPKG_PATH%\triplets\%TARGET_PLATFORM%-windows-static.cmake"
       echo set(VCPKG_BUILD_TYPE release) >> "%VCPKG_PATH%\triplets\%TARGET_PLATFORM%-windows-static.cmake"
 
-  install:
-    - .\install_prereq.bat
+  install: .\install_prereq.bat "%VCPKG_PATH%" %TARGET_PLATFORM%
 
   cache:
     - '%VCPKG_PATH%\installed\ -> install_prereq.bat, ports'

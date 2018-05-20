@@ -68,12 +68,9 @@ build_script:
 after_build:
   - sh: docker push $DOCKER_IMAGE
   - ps: |
-      if ($isLinux) {
-        $ARTIFACT_NAME = "telegram_native_$($TARGET_PLATFORM).so"
-        Move-Item -Path "telegram_native.so" -Destination "$ARTIFACT_NAME"
-      } else {
-        $ARTIFACT_NAME = "telegram_native_$($TARGET_PLATFORM).dll"
-        Move-Item -Path "build\telegram_native.dll" -Destination "$ARTIFACT_NAME"
-      }
-      Write-Host "Pushing artifact $ARTIFACT_NAME"
-      Push-AppveyorArtifact "$ARTIFACT_NAME"
+      $prefix = "telegram_native"
+      $suffix = If ($isLinux) {".so"} Else {".dll"}
+      $artifact = "$prefix_$env:TARGET_PLATFORM$suffix"
+      Rename-Item -Path "$prefix$suffix" -NewName "$artifact"
+      Write-Host "Pushing artifact $artifact"
+      Push-AppveyorArtifact "$artifact"

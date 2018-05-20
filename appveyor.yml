@@ -78,4 +78,4 @@ after_build:
       $artifact = "$($prefix)_$($env:TARGET_PLATFORM)$($suffix)"
       Rename-Item -Path "$prefix$suffix" -NewName "$artifact"
       Write-Host "Pushing artifact $artifact"
-      Push-AppveyorArtifact "$artifact"
+      Push-AppveyorArtifact $artifact

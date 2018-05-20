@@ -30,14 +30,13 @@ matrix:
       TARGET_PLATFORM: x86
 
 init:
-  - cmd: |
-      # Get Ninja
+  - cmd: |      
       appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
       7z x ninja.zip -oC:\ninja > nul
       rm ninja.zip
       set PATH=C:\ninja;%PATH%
       ninja --version
-      # Patch triplets
+  - cmd: |      
       echo. >> "%VCPKG_PATH%\triplets\%TARGET_PLATFORM%-windows-static.cmake"
       echo set(VCPKG_BUILD_TYPE release) >> "%VCPKG_PATH%\triplets\%TARGET_PLATFORM%-windows-static.cmake"
   - sh: |
@@ -70,10 +69,10 @@ after_build:
   - sh: docker push $DOCKER_IMAGE
   - ps: |
       if ($isLinux) {
-        $ARTIFACT_NAME = telegram_native_$($TARGET_PLATFORM).so
+        $ARTIFACT_NAME = "telegram_native_$($TARGET_PLATFORM).so"
         Move-Item -Path "telegram_native.so" -Destination "$ARTIFACT_NAME"
       } else {
-        $ARTIFACT_NAME = telegram_native_$($TARGET_PLATFORM).dll
+        $ARTIFACT_NAME = "telegram_native_$($TARGET_PLATFORM).dll"
         Move-Item -Path "build\telegram_native.dll" -Destination "$ARTIFACT_NAME"
       }
       Push-AppveyorArtifact "$ARTIFACT_NAME"

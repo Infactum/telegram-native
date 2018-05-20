@@ -1,43 +1,92 @@
 version: 1.0.0-alpha+{build}
 
-image: Visual Studio 2017
+image:
+  - Visual Studio 2017
+  - Ubuntu
 
 configuration: Release
 
+platform: x64
+
 environment:
-  VCPKG_PATH: "c:\\tools\\vcpkg"
-  NINJA_URL: "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
-  MSVC_HOME: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community"
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  matrix:
+    - TARGET_PLATFORM: x86
+    - TARGET_PLATFORM: x64
 
-platform:
-  - x86
-  - x64
+matrix:
+  exclude:
+    - image: Ubuntu
+      TARGET_PLATFORM: x86
 
-init:
-  # Get Ninja
-  - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
-  - 7z x ninja.zip -oC:\ninja > nul
-  - rm ninja.zip
-  - set PATH=C:\ninja;%PATH%
-  - ninja --version
-  # Patch triplets
-  - echo. >> "%VCPKG_PATH%\triplets\%PLATFORM%-windows-static.cmake"
-  - echo set(VCPKG_BUILD_TYPE release) >> "%VCPKG_PATH%\triplets\%PLATFORM%-windows-static.cmake"
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2017
 
-install:
-  - .\install_prereq.bat
+  environment:
+    VCPKG_PATH: "c:\\tools\\vcpkg"
+    NINJA_URL: "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip"
+    MSVC_HOME: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community"
 
-cache:
-  - '%VCPKG_PATH%\installed\ -> install_prereq.bat, ports'
-    
-build_script:
-  - call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%
-  - mkdir build
-  - cd build
-  - cmake "-DCMAKE_TOOLCHAIN_FILE=%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=%PLATFORM%-windows-static" "-DCMAKE_BUILD_TYPE=%CONFIGURATION%" -GNinja ..
-  - ninja
+  init:
+    # Get Ninja
+    - |
+      appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+      7z x ninja.zip -oC:\ninja > nul
+      rm ninja.zip
+      set PATH=C:\ninja;%PATH%
+      ninja --version
+    # Patch triplets
+    - |
+      echo. >> "%VCPKG_PATH%\triplets\%TARGET_PLATFORM%-windows-static.cmake"
+      echo set(VCPKG_BUILD_TYPE release) >> "%VCPKG_PATH%\triplets\%TARGET_PLATFORM%-windows-static.cmake"
 
-artifacts:
-  - path: build\telegram_native.dll
-    name: telegram_native.dll (%PLATFORM%)
+  install:
+    - .\install_prereq.bat
+
+  cache:
+    - '%VCPKG_PATH%\installed\ -> install_prereq.bat, ports'
+      
+  build_script: |
+    call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %TARGET_PLATFORM%
+    mkdir build
+    cd build
+    cmake "-DCMAKE_TOOLCHAIN_FILE=%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake" "-DVCPKG_TARGET_TRIPLET=%TARGET_PLATFORM%-windows-static" "-DCMAKE_BUILD_TYPE=%CONFIGURATION%" -GNinja ..
+    ninja
+
+  artifacts:
+    - path: build\telegram_native.dll
+      name: telegram_native.dll (%TARGET_PLATFORM%)
+
+-
+  matrix:
+    only:
+      - image: Ubuntu
+
+  environment:
+    DOCKER_LOGIN: infactum
+    DOCKER_PASSWORD:
+      secure: U+zwWzwRmm8gbcbCrVK5/A==
+    DOCKER_IMAGE: infactum/telegram-native-builder
+
+  init: |
+    docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+    docker pull $DOCKER_IMAGE
+
+  install: docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest
+
+  build_script: >- 
+    docker run --rm -v $(pwd):/src $DOCKER_IMAGE /bin/bash -c "
+      mkdir build && cd build;
+      cmake -DCMAKE_BUILD_TYPE=Release /src;
+      cmake --build .;
+      ldd telegram_native.so;
+      cp telegram_native.so /src;"
+
+  after_build: docker push $DOCKER_IMAGE
+
+  artifacts:
+    - path: telegram_native.so
+      name: telegram_native.so (%TARGET_PLATFORM%)

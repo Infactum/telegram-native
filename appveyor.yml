@@ -20,6 +20,8 @@ environment:
     secure: U+zwWzwRmm8gbcbCrVK5/A==
   DOCKER_IMAGE: infactum/telegram-native-builder
 
+  APPVEYOR_RDP_PASSWORD: 'Password123'
+
   matrix:
     - TARGET_PLATFORM: x86
     - TARGET_PLATFORM: x64
@@ -30,6 +32,10 @@ matrix:
       TARGET_PLATFORM: x86
 
 init:
+  - ps: |
+      If ($isWindows) {
+        iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      }
   - ps: |
       If ($isLinux) {
         $env:APPVEYOR_CACHE_SKIP_RESTORE = "true"

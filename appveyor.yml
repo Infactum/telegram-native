@@ -20,9 +20,6 @@ environment:
     secure: U+zwWzwRmm8gbcbCrVK5/A==
   DOCKER_IMAGE: infactum/telegram-native-builder
 
-  APPVEYOR_RDP_PASSWORD:
-    secure: YYIKdoqZWlzwcuUbP4RUWw==
-
   matrix:
     - TARGET_PLATFORM: x86
     - TARGET_PLATFORM: x64
@@ -34,16 +31,10 @@ matrix:
 
 init:
   - ps: |
-      If (-Not $isLinux) {
-        iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-      }
-
-  - ps: |
       If ($isLinux) {
         $env:APPVEYOR_CACHE_SKIP_RESTORE = "true"
         $env:APPVEYOR_CACHE_SKIP_SAVE = "true"
       }
-      
   - cmd: |      
       appveyor DownloadFile %NINJA_URL_WIN% -FileName ninja.zip
       7z x ninja.zip -oC:\ninja > nul
@@ -84,7 +75,7 @@ after_build:
   - ps: |
       $prefix = "telegram_native"
       $suffix = If ($isLinux) {".so"} Else {".dll"}
-      $artifact = "$prefix_$env:TARGET_PLATFORM$suffix"
+      $artifact = "$($prefix)_$($env:TARGET_PLATFORM)$($suffix)"
       Rename-Item -Path "$prefix$suffix" -NewName "$artifact"
       Write-Host "Pushing artifact $artifact"
       Push-AppveyorArtifact "$artifact"

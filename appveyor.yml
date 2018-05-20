@@ -31,7 +31,7 @@ matrix:
 
 init:
   - cmd: |      
-      appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+      appveyor DownloadFile %NINJA_URL_WIN% -FileName ninja.zip
       7z x ninja.zip -oC:\ninja > nul
       rm ninja.zip
       set PATH=C:\ninja;%PATH%
@@ -75,4 +75,5 @@ after_build:
         $ARTIFACT_NAME = "telegram_native_$($TARGET_PLATFORM).dll"
         Move-Item -Path "build\telegram_native.dll" -Destination "$ARTIFACT_NAME"
       }
+      Write-Host "Pushing artifact $ARTIFACT_NAME"
       Push-AppveyorArtifact "$ARTIFACT_NAME"

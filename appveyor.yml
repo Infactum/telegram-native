@@ -54,8 +54,8 @@ init:
 
 install: 
   - cmd: |
-    vcpkg list
-    .\install_prereq.bat "%VCPKG_PATH%" %TARGET_PLATFORM%
+      vcpkg list
+      .\install_prereq.bat "%VCPKG_PATH%" %TARGET_PLATFORM%
   - sh: docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest
 
 cache:

@@ -20,8 +20,6 @@ environment:
     secure: U+zwWzwRmm8gbcbCrVK5/A==
   DOCKER_IMAGE: infactum/telegram-native-builder
 
-  APPVEYOR_RDP_PASSWORD: 'Password123'
-
   matrix:
     - TARGET_PLATFORM: x86
     - TARGET_PLATFORM: x64

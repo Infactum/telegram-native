@@ -1,4 +1,5 @@
 ﻿#include <td/telegram/td_json_client.h>
+#include <td/telegram/td_log.h>
 #include "TelegramNative.h"
 #include "unicode/unistr.h"
 
@@ -82,6 +83,9 @@ long TelegramNative::GetNParams(const long method_num) {
         case TdExecute:
         case TdSend:
         case SetAsyncMode:
+        case TdSetLogFilePath:
+        case TdSetLogMaxFileSize:
+        case TdSetLogVerbosityLevel:
             return 1;
         case TdReceive:
         default:
@@ -93,9 +97,12 @@ bool TelegramNative::HasRetVal(const long method_num) {
     switch (method_num) {
         case TdExecute:
         case TdReceive:
+        case TdSetLogFilePath:
             return true;
         case TdSend:
         case SetAsyncMode:
+        case TdSetLogMaxFileSize:
+        case TdSetLogVerbosityLevel:
         default:
             return false;
     }
@@ -106,7 +113,9 @@ bool TelegramNative::CallAsProc(const long method_num, tVariant *params, const l
         case TdSend: {
 
             std::string command;
-            parse_param(params[0], command);
+            if (!parse_param(params[0], command)) {
+                return false;
+            };
 
             td_json_client_send(telegram_client, command.c_str());
 
@@ -140,6 +149,22 @@ bool TelegramNative::CallAsProc(const long method_num, tVariant *params, const l
             return true;
         }
 
+        case TdSetLogMaxFileSize: {
+
+            auto max_file_size = TV_I4(&params[0]);
+            td_set_log_max_file_size(max_file_size);
+
+            return true;
+        }
+
+        case TdSetLogVerbosityLevel: {
+
+            auto log_level = TV_I4(&params[0]);
+            td_set_log_verbosity_level(log_level);
+
+            return true;
+        }
+
         default:
             return false;
     }
@@ -153,7 +178,9 @@ TelegramNative::CallAsFunc(const long method_num, tVariant *ret_value, tVariant 
         case TdExecute: {
 
             std::string command;
-            parse_param(params[0], command);
+            if (!parse_param(params[0], command)) {
+                return false;
+            };
 
             icu::UnicodeString result = td_json_client_execute(telegram_client, command.c_str());
             auto len = static_cast<uint32_t>(result.length());
@@ -193,6 +220,21 @@ TelegramNative::CallAsFunc(const long method_num, tVariant *ret_value, tVariant 
             return true;
         }
 
+        case TdSetLogFilePath: {
+
+            std::string command;
+            if (!parse_param(params[0], command)) {
+                return false;
+            };
+
+            auto success = td_set_log_file_path(command.c_str());
+
+            TV_VT(ret_value) = VTYPE_BOOL;
+            ret_value->bVal = static_cast<bool>(success);
+
+            return true;
+        }
+
         default:
             return false;
     }
@@ -201,8 +243,14 @@ TelegramNative::CallAsFunc(const long method_num, tVariant *ret_value, tVariant 
 
 TelegramNative::TelegramNative() {
 
-    methods = {u"Send", u"Receive", u"Execute", u"SetAsyncMode"};
-    methods_ru = {u"Отправить", u"Получить", u"Выполнить", u"УстановитьАсинхронныйРежим"};
+    methods = {
+            u"Send", u"Receive", u"Execute", u"SetAsyncMode",
+            u"SetLogFilePath", u"SetLogMaxFileSize", u"SetLogVerbosityLevel"
+    };
+    methods_ru = {
+            u"Отправить", u"Получить", u"Выполнить", u"УстановитьАсинхронныйРежим",
+            u"УстановитьФайлЖурнала", u"УстановитьМаксимальныйРазмерФайлаЖурнала", u"УстановитьУровеньДетализацииЖурнала"
+    };
 
     telegram_client = td_json_client_create();
 }
@@ -218,18 +266,22 @@ TelegramNative::~TelegramNative() {
     td_json_client_destroy(telegram_client);
 }
 
-void TelegramNative::parse_param(const tVariant param, std::string &out) {
+bool TelegramNative::parse_param(const tVariant param, std::string &out) {
     switch (param.vt) {
         case VTYPE_PSTR: {
             out.assign(param.pstrVal, param.strLen);
+            break;
         }
         case VTYPE_PWSTR: {
             icu::UnicodeString tmp{param.pwstrVal, static_cast<int32_t>(param.wstrLen)};
             tmp.toUTF8String(out);
+            break;
         }
         default:
-            break;
+            return false;
     }
+
+    return true;
 }
 
 void TelegramNative::rcv_loop() {

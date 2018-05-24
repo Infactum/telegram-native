@@ -20,6 +20,9 @@ public:
         TdReceive,
         TdExecute,
         SetAsyncMode,
+        TdSetLogFilePath,
+        TdSetLogMaxFileSize,
+        TdSetLogVerbosityLevel,
         LastMethod
     };
 
@@ -72,7 +75,7 @@ public:
     void ADDIN_API SetLocale(const WCHAR_T *locale) override {};
 
 private:
-    static void parse_param(tVariant param, std::string &out);
+    static bool parse_param(tVariant param, std::string &out);
 
     IAddInDefBase *connection{nullptr};
     IMemoryManager *memory_manager{nullptr};
@@ -84,6 +87,7 @@ private:
 
     std::thread rcv_thread;
     double rcv_timeout{1.0};
+
     void rcv_loop();
 
     bool async_mode{false};

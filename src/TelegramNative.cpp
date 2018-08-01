@@ -183,41 +183,13 @@ TelegramNative::CallAsFunc(const long method_num, tVariant *ret_value, tVariant 
             };
 
             icu::UnicodeString result = td_json_client_execute(telegram_client, command.c_str());
-            auto len = static_cast<uint32_t>(result.length());
-
-            TV_VT(ret_value) = VTYPE_PWSTR;
-            size_t bytes = (len + 1) * sizeof(WCHAR_T);
-
-            if (!memory_manager ||
-                !memory_manager->AllocMemory(reinterpret_cast<void **>(&ret_value->pstrVal), bytes)) {
-                return false;
-            };
-
-            memcpy(ret_value->pwstrVal, result.getTerminatedBuffer(), bytes);
-            ret_value->wstrLen = len;
-
-            return true;
+            return set_wstr_val(ret_value, result);
 
         }
 
         case TdReceive: {
-
             icu::UnicodeString result = td_json_client_receive(telegram_client, rcv_timeout);
-
-            auto len = static_cast<uint32_t>(result.length());
-
-            TV_VT(ret_value) = VTYPE_PWSTR;
-            size_t bytes = (len + 1) * sizeof(WCHAR_T);
-
-            if (!memory_manager ||
-                !memory_manager->AllocMemory(reinterpret_cast<void **>(&ret_value->pstrVal), bytes)) {
-                return false;
-            };
-
-            memcpy(ret_value->pwstrVal, result.getTerminatedBuffer(), bytes);
-            ret_value->wstrLen = len;
-
-            return true;
+            return set_wstr_val(ret_value, result);
         }
 
         case TdSetLogFilePath: {
@@ -242,6 +214,13 @@ TelegramNative::CallAsFunc(const long method_num, tVariant *ret_value, tVariant 
 }
 
 TelegramNative::TelegramNative() {
+
+    props = {
+            u"EventSourceName"
+    };
+    props_ru = {
+            u"ИмяИсточникаСобытий"
+    };
 
     methods = {
             u"Send", u"Receive", u"Execute", u"SetAsyncMode",
@@ -288,7 +267,10 @@ void TelegramNative::rcv_loop() {
 
     while (async_mode) {
 
-        char16_t source[] = u"TelegramNative";
+        auto es_len = static_cast<size_t>(event_source_name.length() + 1);
+        auto source = new char16_t[es_len];
+        memcpy(source, event_source_name.getTerminatedBuffer(), sizeof(WCHAR_T) * es_len);
+
         char16_t message[] = u"Response";
 
         icu::UnicodeString response = td_json_client_receive(telegram_client, rcv_timeout);
@@ -305,7 +287,118 @@ void TelegramNative::rcv_loop() {
                                   reinterpret_cast<WCHAR_T *>(message),
                                   reinterpret_cast<WCHAR_T *>(data));
 
+        delete[] source;
         delete[] data;
     }
 
+}
+
+long TelegramNative::FindProp(const WCHAR_T *prop_name) {
+    icu::UnicodeString lookup_name{prop_name};
+
+    for (auto i = 0u; i < props.size(); ++i) {
+        if (props[i].toLower() == lookup_name.toLower()) {
+            return static_cast<long>(i);
+        }
+    }
+
+    for (auto i = 0u; i < props_ru.size(); ++i) {
+        if (props_ru[i].toLower() == lookup_name.toLower()) {
+            return static_cast<long>(i);
+        }
+    }
+
+    return -1;
+}
+
+bool TelegramNative::GetPropVal(const long num, tVariant *value) {
+    switch (num) {
+        case EventSourceName: {
+            return set_wstr_val(value, event_source_name);
+        }
+        default:
+            return false;
+    }
+}
+
+bool TelegramNative::set_wstr_val(tVariant *dest, const icu::UnicodeString &src) {
+
+    auto len = static_cast<uint32_t>(src.length());
+
+    TV_VT(dest) = VTYPE_PWSTR;
+    size_t bytes = (len + 1) * sizeof(WCHAR_T);
+
+    if (!memory_manager ||
+        !memory_manager->AllocMemory(reinterpret_cast<void **>(&dest->pstrVal), bytes)) {
+        return false;
+    };
+
+    memcpy(dest->pwstrVal, event_source_name.getTerminatedBuffer(), bytes);
+    dest->wstrLen = len;
+
+    return true;
+}
+
+bool TelegramNative::SetPropVal(const long num, tVariant *value) {
+
+    switch (num) {
+        case EventSourceName:
+            event_source_name = icu::UnicodeString{value->pwstrVal, static_cast<int32_t>(value->wstrLen)};
+            return true;
+        default:
+            return false;
+    }
+}
+
+const WCHAR_T *TelegramNative::GetPropName(long num, long lang_alias) {
+    if (num > LastMethod) {
+        return nullptr;
+    }
+
+    icu::UnicodeString prop_name;
+
+    switch (lang_alias) {
+        case 0:
+            prop_name = props[num];
+            break;
+        case 1:
+            prop_name = props_ru[num];
+            break;
+        default:
+            return nullptr;
+    }
+
+    if (prop_name.isEmpty()) {
+        return nullptr;
+    }
+
+    WCHAR_T *result = nullptr;
+
+    size_t bytes = (prop_name.length() + 1) * sizeof(char16_t);
+
+    if (!memory_manager || !memory_manager->AllocMemory(reinterpret_cast<void **>(&result), bytes)) {
+        return nullptr;
+    };
+
+    memcpy(result, prop_name.getTerminatedBuffer(), bytes);
+
+    return result;
+}
+
+bool TelegramNative::IsPropReadable(const long lPropNum) {
+    switch (lPropNum) {
+        case EventSourceName:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool TelegramNative::IsPropWritable(const long lPropNum) {
+    switch (lPropNum) {
+        case EventSourceName:
+            return true;
+        default:
+            return false;
+    }
 }

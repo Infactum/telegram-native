@@ -12,7 +12,8 @@
 class TelegramNative : public IComponentBase {
 public:
     enum Props {
-        LastProp = 0
+        EventSourceName = 0,
+        LastProp
     };
 
     enum Methods {
@@ -42,17 +43,17 @@ public:
 
     long ADDIN_API GetNProps() override { return LastProp; };
 
-    long ADDIN_API FindProp(const WCHAR_T *prop_name) override { return -1; };
+    long ADDIN_API FindProp(const WCHAR_T *prop_name) override;
 
-    const WCHAR_T *ADDIN_API GetPropName(long num, long lang_alias) override { return nullptr; };
+    const WCHAR_T *ADDIN_API GetPropName(long num, long lang_alias) override;
 
-    bool ADDIN_API GetPropVal(const long num, tVariant *value) override { return false; };
+    bool ADDIN_API GetPropVal(const long num, tVariant *value) override;
 
-    bool ADDIN_API SetPropVal(const long num, tVariant *value) override { return false; };
+    bool ADDIN_API SetPropVal(const long num, tVariant *value) override;
 
-    bool ADDIN_API IsPropReadable(const long lPropNum) override { return false; };
+    bool ADDIN_API IsPropReadable(const long lPropNum) override;
 
-    bool ADDIN_API IsPropWritable(const long lPropNum) override { return false; };
+    bool ADDIN_API IsPropWritable(const long lPropNum) override;
 
     long ADDIN_API GetNMethods() override { return LastMethod; };
 
@@ -77,12 +78,17 @@ public:
 private:
     static bool parse_param(tVariant param, std::string &out);
 
+    bool set_wstr_val(tVariant *dest, const icu::UnicodeString &src);
+
     IAddInDefBase *connection{nullptr};
     IMemoryManager *memory_manager{nullptr};
 
     std::vector<icu::UnicodeString> methods;
     std::vector<icu::UnicodeString> methods_ru;
+    std::vector<icu::UnicodeString> props;
+    std::vector<icu::UnicodeString> props_ru;
 
+    icu::UnicodeString event_source_name{u"TelegramNative"};
     long buffer_depth{100};
 
     std::thread rcv_thread;

@@ -4,7 +4,7 @@ if(NOT VCPKG_LIBRARY_LINKAGE STREQUAL static)
   message( FATAL_ERROR "Only static build is supported" )
 endif()
 
-set(VERSION 1.2.0)
+set(VERSION 1.3.0)
 set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/tdlib-${VERSION})
 
 vcpkg_from_github(

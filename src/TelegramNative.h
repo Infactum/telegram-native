@@ -7,6 +7,7 @@
 #include <types.h>
 #include <thread>
 #include <vector>
+#include <mutex>
 #include <unicode/unistr.h>
 
 class TelegramNative : public IComponentBase {
@@ -98,6 +99,7 @@ private:
 
     bool async_mode{false};
     void *telegram_client{nullptr};
+    std::mutex rcv_mtx;
 };
 
 #endif //__ADDIN_NATIVE_H__

@@ -32,5 +32,6 @@ if (MSVC)
             OpenSSL::SSL OpenSSL::Crypto
             ZLIB::ZLIB)
     set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
     target_compile_definitions(telegram_native PRIVATE _WINDOWS)
 endif ()

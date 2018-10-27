@@ -1,4 +1,4 @@
-#include <td/telegram/td_json_client.h>
+﻿#include <td/telegram/td_json_client.h>
 #include <td/telegram/td_log.h>
 #include "TelegramNative.h"
 #include "unicode/unistr.h"
@@ -188,6 +188,7 @@ TelegramNative::CallAsFunc(const long method_num, tVariant *ret_value, tVariant 
         }
 
         case TdReceive: {
+            std::lock_guard<std::mutex> lock(rcv_mtx);
             icu::UnicodeString result = td_json_client_receive(telegram_client, rcv_timeout);
             return set_wstr_val(ret_value, result);
         }
@@ -273,6 +274,7 @@ void TelegramNative::rcv_loop() {
 
         char16_t message[] = u"Response";
 
+        std::lock_guard<std::mutex> lock(rcv_mtx);
         icu::UnicodeString response = td_json_client_receive(telegram_client, rcv_timeout);
 
         if (response.isEmpty()) {

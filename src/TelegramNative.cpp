@@ -1,4 +1,4 @@
-﻿#include <td/telegram/td_json_client.h>
+#include <td/telegram/td_json_client.h>
 #include <td/telegram/td_log.h>
 #include "TelegramNative.h"
 #include "unicode/unistr.h"
@@ -321,7 +321,7 @@ bool TelegramNative::GetPropVal(const long num, tVariant *value) {
     }
 }
 
-bool TelegramNative::set_wstr_val(tVariant *dest, const icu::UnicodeString &src) {
+bool TelegramNative::set_wstr_val(tVariant *dest, icu::UnicodeString &src) {
 
     auto len = static_cast<uint32_t>(src.length());
 
@@ -329,11 +329,11 @@ bool TelegramNative::set_wstr_val(tVariant *dest, const icu::UnicodeString &src)
     size_t bytes = (len + 1) * sizeof(WCHAR_T);
 
     if (!memory_manager ||
-        !memory_manager->AllocMemory(reinterpret_cast<void **>(&dest->pstrVal), bytes)) {
+        !memory_manager->AllocMemory(reinterpret_cast<void **>(&dest->pwstrVal), bytes)) {
         return false;
     };
 
-    memcpy(dest->pwstrVal, event_source_name.getTerminatedBuffer(), bytes);
+    memcpy(dest->pwstrVal, src.getTerminatedBuffer(), bytes);
     dest->wstrLen = len;
 
     return true;

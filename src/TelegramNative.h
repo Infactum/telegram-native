@@ -78,7 +78,7 @@ public:
 private:
     static bool parse_param(tVariant param, std::string &out);
 
-    bool set_wstr_val(tVariant *dest, const icu::UnicodeString &src);
+    bool set_wstr_val(tVariant *dest, icu::UnicodeString &src);
 
     IAddInDefBase *connection{nullptr};
     IMemoryManager *memory_manager{nullptr};

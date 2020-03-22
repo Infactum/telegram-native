@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b8cf3b05..66ba2983 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -933,7 +933,7 @@ add_library(Td::TdStatic ALIAS TdStatic)
+ add_library(Td::TdJson ALIAS TdJson)
+ add_library(Td::TdJsonStatic ALIAS TdJsonStatic)
+ 
+-install(TARGETS tdjson TdJson tdjson_static TdJsonStatic tdjson_private tdclient tdcore tdapi TdStatic EXPORT TdTargets
++install(TARGETS tdjson_static TdJsonStatic tdjson_private tdclient tdcore tdapi TdStatic EXPORT TdTargets
+   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"

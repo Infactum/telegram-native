@@ -2,7 +2,7 @@
 
 set _VCPKG_PATH=%~1
 set _TARGET_PLATFORM=%~2
-set _TARGET_TRIPLET=%_TARGET_PLATFORM%-windows-static-md
+set _TARGET_TRIPLET=%_TARGET_PLATFORM%-windows-static
 
 xcopy tools\vcpkg\. "%_VCPKG_PATH%\" /E
 vcpkg install ^

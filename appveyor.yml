@@ -81,3 +81,8 @@ after_build:
       Rename-Item -Path "$prefix$suffix" -NewName "$artifact"
       Write-Host "Pushing artifact $artifact"
       Push-AppveyorArtifact $artifact
+
+on_failure:
+  - cmd: |
+      7z a logs.zip "%VCPKG_PATH%\buildtrees\**\*.log"
+      appveyor PushArtifact logs.zip

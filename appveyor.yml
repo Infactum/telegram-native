@@ -52,7 +52,7 @@ install:
   - cmd: |      
       vcpkg list      
       .\install_prereq.bat "%VCPKG_PATH%" %TARGET_PLATFORM%
-  - sh: docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest
+  - sh: docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest -f tools/docker/linux-builder/Dockerfile
 
 cache:
     - '%VCPKG_PATH%\installed\ -> install_prereq.bat, ports'

@@ -29,7 +29,7 @@ if (MSVC)
     target_link_libraries(telegram_native PRIVATE
             OpenSSL::SSL OpenSSL::Crypto
             ZLIB::ZLIB)
-    set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /DNDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "/MDd")
+    set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
     target_compile_definitions(telegram_native PRIVATE _WINDOWS)
 endif ()

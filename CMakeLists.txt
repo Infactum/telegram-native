@@ -23,7 +23,9 @@ add_library(telegram_native SHARED
         src/exports.cpp)
 
 target_include_directories(telegram_native PRIVATE include)
-target_link_libraries(telegram_native PRIVATE Td::TdJsonStatic)
+target_link_libraries(telegram_native PRIVATE
+        Td::TdJsonStatic
+        ICU::uc ICU::dt)
 
 if (MSVC)
     target_link_libraries(telegram_native PRIVATE

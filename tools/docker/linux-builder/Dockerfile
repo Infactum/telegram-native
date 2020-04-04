@@ -45,6 +45,7 @@ RUN set -xe \
     && cd td \
     && git reset --hard c407b244a086e71773e0b9f8f64d4fb0536bc447 \
     && sed -i '0,/if (NOT OPENSSL_FOUND)/s//set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")\n&/' CMakeLists.txt \
+    && sed -i '/add_subdirectory(benchmark)/ s/^#*/#/' CMakeLists.txt \
     && mkdir build \
     && cd build \
     && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DZLIB_ROOT=/usr/local/lib -DOPENSSL_ROOT_DIR=/usr/local/lib -DOPENSSL_USE_STATIC_LIBS=TRUE .. \

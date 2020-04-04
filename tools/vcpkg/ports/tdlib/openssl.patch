@@ -1,0 +1,75 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b8cf3b05..60a84bb8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -774,6 +774,10 @@ target_include_directories(tdcore PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURC
+ target_include_directories(tdcore SYSTEM PRIVATE ${OPENSSL_INCLUDE_DIR})
+ target_link_libraries(tdcore PUBLIC tdapi tdactor tdutils tdnet tddb PRIVATE ${OPENSSL_CRYPTO_LIBRARY} ${CMAKE_DL_LIBS} ${ZLIB_LIBRARIES})
+ 
++if (NOT UNIX)
++  target_link_libraries(tdcore PUBLIC crypt32.lib)
++endif()
++
+ if (NOT CMAKE_CROSSCOMPILING)
+   add_dependencies(tdcore tl_generate_common)
+   if (TD_ENABLE_JNI)
+diff --git a/benchmark/CMakeLists.txt b/benchmark/CMakeLists.txt
+index 9b7d5c05..17a25006 100644
+--- a/benchmark/CMakeLists.txt
++++ b/benchmark/CMakeLists.txt
+@@ -10,6 +10,10 @@ add_executable(bench_crypto bench_crypto.cpp)
+ target_link_libraries(bench_crypto PRIVATE tdutils ${OPENSSL_CRYPTO_LIBRARY} ${CMAKE_DL_LIBS} ${ZLIB_LIBRARIES})
+ target_include_directories(bench_crypto SYSTEM PRIVATE ${OPENSSL_INCLUDE_DIR})
+ 
++if (NOT UNIX)
++  target_link_libraries(bench_crypto PUBLIC crypt32.lib)
++endif()
++
+ add_executable(bench_actor bench_actor.cpp)
+ target_link_libraries(bench_actor PRIVATE tdactor tdutils)
+ 
+diff --git a/sqlite/CMakeLists.txt b/sqlite/CMakeLists.txt
+index c8968576..9e5c5ad1 100644
+--- a/sqlite/CMakeLists.txt
++++ b/sqlite/CMakeLists.txt
+@@ -21,6 +21,11 @@ add_library(tdsqlite STATIC ${SQLITE_SOURCE})
+ target_include_directories(tdsqlite PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ target_include_directories(tdsqlite SYSTEM PRIVATE ${OPENSSL_INCLUDE_DIR})
+ target_link_libraries(tdsqlite PRIVATE ${OPENSSL_CRYPTO_LIBRARY} ${CMAKE_DL_LIBS} ${ZLIB_LIBRARIES})
++
++if (NOT UNIX)
++  target_link_libraries(tdsqlite PUBLIC crypt32.lib)
++endif()
++
+ target_compile_definitions(tdsqlite PRIVATE
+   -DSQLITE_DEFAULT_MEMSTATUS=0
+   -DSQLITE_OMIT_LOAD_EXTENSION
+diff --git a/tdnet/CMakeLists.txt b/tdnet/CMakeLists.txt
+index ca7e33bf..e86b33e7 100644
+--- a/tdnet/CMakeLists.txt
++++ b/tdnet/CMakeLists.txt
+@@ -58,6 +58,10 @@ if (NOT EMSCRIPTEN)
+ endif()
+ target_link_libraries(tdnet PRIVATE ${OPENSSL_CRYPTO_LIBRARY})
+ 
++if (NOT UNIX)
++  target_link_libraries(tdnet PUBLIC crypt32.lib)
++endif()
++
+ if (WIN32)
+   target_link_libraries(tdnet PRIVATE Crypt32)
+ endif()
+diff --git a/tdutils/CMakeLists.txt b/tdutils/CMakeLists.txt
+index d57d93c8..00742e71 100644
+--- a/tdutils/CMakeLists.txt
++++ b/tdutils/CMakeLists.txt
+@@ -302,6 +302,9 @@ target_include_directories(tdutils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOUR
+ 
+ if (OPENSSL_FOUND)
+   target_link_libraries(tdutils PRIVATE ${OPENSSL_CRYPTO_LIBRARY} ${CMAKE_DL_LIBS} ${ZLIB_LIBRARIES})
++  if (NOT UNIX)
++    target_link_libraries(tdutils PRIVATE crypt32.lib)
++  endif()
+   target_include_directories(tdutils SYSTEM PRIVATE ${OPENSSL_INCLUDE_DIR})
+ endif()
+ 

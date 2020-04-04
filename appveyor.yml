@@ -1,4 +1,4 @@
-version: 1.0.0-alpha+{build}
+version: 1.0.0+{build}
 
 image:
   - Visual Studio 2017
@@ -52,7 +52,7 @@ install:
   - cmd: |      
       vcpkg list      
       .\install_prereq.bat "%VCPKG_PATH%" %TARGET_PLATFORM%
-  - sh: docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest
+  - sh: docker build . --cache-from $DOCKER_IMAGE -t $DOCKER_IMAGE:latest -f tools/docker/linux-builder/Dockerfile
 
 cache:
     - '%VCPKG_PATH%\installed\ -> install_prereq.bat, ports'
@@ -81,3 +81,8 @@ after_build:
       Rename-Item -Path "$prefix$suffix" -NewName "$artifact"
       Write-Host "Pushing artifact $artifact"
       Push-AppveyorArtifact $artifact
+
+on_failure:
+  - cmd: |
+      7z a logs.zip "%VCPKG_PATH%\buildtrees\**\*.log"
+      appveyor PushArtifact logs.zip

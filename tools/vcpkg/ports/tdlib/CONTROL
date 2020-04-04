@@ -1,0 +1,4 @@
+Source: tdlib
+Version: 1.6.1
+Description: Telegram Database library.
+Build-Depends: zlib, openssl

@@ -1,7 +1,8 @@
 ﻿#include <td/telegram/td_json_client.h>
 #include <td/telegram/td_log.h>
+#include <unicode/unistr.h>
+
 #include "TelegramNative.h"
-#include "unicode/unistr.h"
 
 bool TelegramNative::Init(void *connection_) {
     connection = static_cast<IAddInDefBase *>(connection_);

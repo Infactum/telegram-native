@@ -33,7 +33,7 @@ RUN set -xe \
     && cd / && rm -rf openssl
 
 RUN set -xe \
-    && wget -O icu.tar.gz http://download.icu-project.org/files/icu4c/61.1/icu4c-61_1-src.tgz \
+    && wget -O icu.tar.gz https://github.com/unicode-org/icu/releases/download/release-61-2/icu4c-61_2-src.tgz \
     && tar xzvf icu.tar.gz \
     && cd icu/source \
     && CXXFLAGS=-fPIC CFLAGS=-fPIC ./runConfigureICU Linux/gcc --enable-static \
